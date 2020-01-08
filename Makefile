@@ -2,7 +2,7 @@
 CSC=csc
 CSC=mcs
 
-PROG=wmctrl.exe
+PROG=./wmctrl.exe
 
 
 
@@ -15,4 +15,5 @@ $(PROG): wmctrl.cs
 test:
 	$(PROG) -h
 	$(PROG) -l
-	$(PROG) -a gvim
+	$(PROG) -a devenv
+	#you can test the others yourself :D

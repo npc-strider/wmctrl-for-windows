@@ -33,7 +33,63 @@ public class wmctrl
         }
     }
 
+    // --------------------------------------------------------------------------------
+    // --- Switch to Window (TITLE)
+    // --------------------------------------------------------------------------------
     
+    public static int SwitchToWindowTitle(string procTitle)
+    {
+        int ret = -1;
+        Process[] procs = Process.GetProcesses();
+        foreach (Process proc in procs)
+        {
+            if (! String.IsNullOrEmpty(proc.MainWindowTitle) && string.Compare(procTitle, proc.MainWindowTitle) == 0)
+            {
+                Console.WriteLine("Process Name: {0} ID: {1} Title: {2}", proc.ProcessName, proc.Id, proc.MainWindowTitle);
+                SwitchToThisWindow(proc.MainWindowHandle); //Just going to use the first window as per usual
+                ret = 0;
+                break;
+            }
+        }
+        if (ret == -1)
+        {
+            Console.WriteLine("Error: No process found for title: {0}", procTitle);
+        }
+        return ret;
+    }
+
+    // --------------------------------------------------------------------------------
+    // --- Switch to Window (PID)
+    // --------------------------------------------------------------------------------
+
+    public static int SwitchToWindowPID(string procPIDstr)
+    {
+        int ret = -1;
+        int procPID;
+        if (Int32.TryParse(procPIDstr, out procPID)){
+            Process[] procs = Process.GetProcesses();
+            foreach (Process proc in procs)
+            {
+                if (procPID == proc.Id) //Can processes have no PID in MS windows? I have no idea.
+                {
+                    Console.WriteLine("Process Name: {0} ID: {1} Title: {2}", proc.ProcessName, proc.Id, proc.MainWindowTitle);
+                    SwitchToThisWindow(proc.MainWindowHandle); //Just going to use the first window as per usual
+                    ret = 0;
+                    break;
+                }
+            }
+            if (ret == -1)
+            {
+                Console.WriteLine("Error: No process found for PID: {0}", procPIDstr);
+            }
+        }
+        else
+        {
+            Console.WriteLine("Error: Invalid PID: {0}", procPIDstr);
+        }
+        return ret;
+    }
+
     // --------------------------------------------------------------------------------
     // --- List Windows info
     // --------------------------------------------------------------------------------
@@ -59,9 +115,11 @@ public class wmctrl
         Console.WriteLine("usage: wmctrl [options] [args]");
         Console.WriteLine("");
         Console.WriteLine("options:");
-        Console.WriteLine("  -h         : show this help");
-        Console.WriteLine("  -l         : list windows");
-        Console.WriteLine("  -a <PNAME> : switch to the window of the process name <PNAME>");
+        Console.WriteLine("  -h          : show this help");
+        Console.WriteLine("  -l          : list windows");
+        Console.WriteLine("  -a <PNAME>  : switch to the window of the process name <PNAME>");
+        Console.WriteLine("  -b <PTITLE> : switch to the window of the process title <PTITLE>");
+        Console.WriteLine("  -p <PID>    : switch to the window of the process ID <PID>");
         Console.WriteLine("");
     
     }
@@ -96,6 +154,24 @@ public class wmctrl
                         i=i+2;
                     }else{
                         Console.WriteLine("Error: command line option -a needs to be followed by a process name.");
+                        status=-1;
+                    }
+                    break;
+                case "-b": // Switch to window (TITLE)
+                    if (i+1<nArgs) {
+                        status=SwitchToWindowTitle(args[i+1]);
+                        i=i+2;
+                    }else{
+                        Console.WriteLine("Error: command line option -a needs to be followed by a process title.");
+                        status=-1;
+                    }
+                    break;
+                case "-p": // Switch to window (PID)
+                    if (i+1<nArgs) {
+                        status=SwitchToWindowPID(args[i+1]);
+                        i=i+2;
+                    }else{
+                        Console.WriteLine("Error: command line option -a needs to be followed by a process ID.");
                         status=-1;
                     }
                     break;
